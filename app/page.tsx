@@ -1,113 +1,174 @@
-import Image from "next/image";
+'use client'
+
+import React, { useState, useRef } from 'react'
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Loader2 } from "lucide-react"
+import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+
+interface AnalysisResult {
+  appropriateness: string
+  preparations: string
+  etiquette: string
+  gift: string
+}
 
 export default function Home() {
+  const [file, setFile] = useState<File | null>(null)
+  const [country, setCountry] = useState('')
+  const [place, setPlace] = useState('')
+  const [giftRequired, setGiftRequired] = useState(false)
+  const [result, setResult] = useState<AnalysisResult | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [furtherInfo, setFurtherInfo] = useState('')
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files.length > 0) {
+      setFile(event.target.files[0])
+    }
+  }
+
+  const handleFurtherInfo = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.value) {
+      setFurtherInfo(event.target.value)
+    }
+  }
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (!file || !country || !place) return
+
+    setLoading(true)
+    setResult(null)
+
+    const formData = new FormData()
+    formData.append('image', file)
+    formData.append('country', country)
+    formData.append('place', place)
+    formData.append('giftRequired', giftRequired.toString())
+    formData.append('furtherInfo', furtherInfo)
+
+    try {
+      const response = await fetch('/api/analyze-outfit', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok')
+      }
+
+      const data = await response.json()
+      setResult(data)
+    } catch (error) {
+      console.error('Error:', error)
+      alert('An error occurred while analyzing the outfit')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:size-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <div className="container mx-auto p-12">
+      <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
+        Maan-Naa
+      </h1>
+      <h2 className="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0">
+        We recommend appropriate outfit for your meetup.
+      </h2>
+      <form onSubmit={handleSubmit}>
+        <div className="mt-4 mb-4">
+          <Label htmlFor="image">Image of your own</Label>
+          <Input type="file" id="image" onChange={handleFileChange} accept="image/*" required className="w-[300px]" />
         </div>
-      </div>
+        <div className="mb-4">
+          <Select onValueChange={setCountry}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="country" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="China">China</SelectItem>
+              <SelectItem value="France">France</SelectItem>
+              <SelectItem value="India">India</SelectItem>
+              <SelectItem value="Korea">Korea</SelectItem>
+              <SelectItem value="USA">USA</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="mb-4">
+          <Select onValueChange={setPlace}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="place" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="job interview">job interview</SelectItem>
+              <SelectItem value="blind date">blind date</SelectItem>
+              <SelectItem value="first date">first date</SelectItem>
+              <SelectItem value="travel">travel</SelectItem>
+              <SelectItem value="wedding propose">wedding propose</SelectItem>
+              <SelectItem value="wedding ceremony">wedding ceremony</SelectItem>
+              <SelectItem value="funeral">funeral</SelectItem>
+              <SelectItem value="bridal shower">bridal shower</SelectItem>
+              <SelectItem value="baby shower">baby shower</SelectItem>
+              <SelectItem value="retirement">retirement</SelectItem>
+              <SelectItem value="first day at school">first day at school</SelectItem>
+              <SelectItem value="first day at work">first day at work</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="mb-4 flex items-center space-x-2">
+          <Checkbox
+            id="giftRequired"
+            checked={giftRequired}
+            onCheckedChange={(checked) => setGiftRequired(checked as boolean)}
+          />
+          <Label htmlFor="giftRequired">Gift or preparation required?</Label>
+        </div>
+        <div className="mb-4">
+          <Label htmlFor="furtherInfo">Type in any further information</Label>
+          <Input
+            type="text"
+            id="furtherInfo"
+            placeholder="further information.."
+            onChange={handleFurtherInfo}
+          />
+        </div>
+        <Button type="submit" disabled={!file || !country || !place || loading}>
+          {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+          Analyze Outfit
+        </Button>
+      </form>
 
-      <div className="relative z-[-1] flex place-items-center before:absolute before:h-[300px] before:w-full before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 sm:before:w-[480px] sm:after:w-[240px] before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-balance text-sm opacity-50">
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  );
+      {result && (
+        <Card className="mt-4">
+          <CardHeader>
+            <CardTitle><strong>Analysis Result</strong></CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p><strong>Appropriateness</strong> : <br /> {result.appropriateness}</p>
+            <br />
+            <p><strong>Etiquette</strong> : <br /> {result.etiquette}</p>
+            <br />
+            <p><strong>Preparations</strong> : <br /> {result.preparations}</p>
+            <br />
+            <p><strong>Gifts</strong> :<br />
+            {result.gift &&
+               (`${result.gift}`)
+              }
+            </p>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  )
 }
