@@ -122,9 +122,16 @@ export default function Home() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="China">China</SelectItem>
+              <SelectItem value="England">England</SelectItem>
               <SelectItem value="France">France</SelectItem>
+              <SelectItem value="Germany">Germany</SelectItem>
+              <SelectItem value="Greece">Greece</SelectItem>
               <SelectItem value="India">India</SelectItem>
+              <SelectItem value="Italy">Italy</SelectItem>
               <SelectItem value="Korea">Korea</SelectItem>
+              <SelectItem value="Spain">Spain</SelectItem>
+              <SelectItem value="Sweden">Sweden</SelectItem>
+              <SelectItem value="Ukraine">Ukraine</SelectItem>
               <SelectItem value="USA">USA</SelectItem>
             </SelectContent>
           </Select>

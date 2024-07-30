@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";
 import "../style/global.css";
+import { GoogleAnalytics } from "@next/third-parties/google";
 
 
 export const metadata: Metadata = {
@@ -73,11 +74,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-          
-            {children}
-            <Toaster />
-
+        {children}
+        <Toaster />
       </body>
+      <GoogleAnalytics gaId="G-GS69YDBEKP" />
     </html>
   );
 }
