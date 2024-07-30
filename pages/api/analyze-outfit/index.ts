@@ -58,16 +58,17 @@ export default async function handler(
 
       const prompt = `You are going to pretend to be a senior editor at elle fashion magazine. You must analyze the outfit in the image for a ${place} in ${country} by adding all the information necessary.
 ### Instruction ###
-1. Is the outfit appropriate for the event? Why or why not? If not, suggest the best style in detail.
-2. What are important etiquette rules to follow for this event in ${country}?
-3. What preparations are typically expected for this event in ${country}?
-${giftRequired ? `4. What kind of gifts should I bring for this event in ${country}?` : ''}
-${furtherInfo ? `5. ${furtherInfo}` : ''}
+1. Is the outfit appropriate for the event? Why or why not? If not, suggest the best clothes, accessories, and other outfit in detail.
+2. Based on the ${country} and ${place}, advise the appropriate color matching for outfit.
+3. What are important etiquette rules to follow for ${place} in ${country}?
+4. What preparations are typically expected for ${place} in ${country}?
+${giftRequired ? `5. What kind of gifts should I bring for ${place} in ${country}?` : ''}
+${furtherInfo ? `6. ${furtherInfo}` : ''}
 
 Please provide a detailed response covering all these aspects.
 
 ### Response Format ###
-{ "appropriateness": "", "etiquette" : "", "preparations": "", "gift": "" }
+{ "appropriateness": "", "colormatching" : "", "etiquette" : "", "preparations": "", "gift": "" }
           `
 
       console.log(prompt);

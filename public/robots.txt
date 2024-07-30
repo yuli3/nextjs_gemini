@@ -1,0 +1,4 @@
+User-agent: *
+Allow:/
+
+Sitemap: https://nextjs-gemini-one.vercel.app/sitemap.xml
